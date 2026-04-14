@@ -245,7 +245,7 @@ This project is being built incrementally. I'm adding features and services as I
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/Patient-Management-System.git
+git clone https://github.com/rightmeprove/Patient-Management-System.git
 cd Patient-Management-System/patient-service
 
 # Build the project (downloads dependencies + compiles)
