@@ -2,12 +2,16 @@ package com.provemeright.patient_service.controller;
 
 import com.provemeright.patient_service.dto.PatientRequestDto;
 import com.provemeright.patient_service.dto.PatientResponseDto;
+import com.provemeright.patient_service.dto.validators.CreatePatientValidationGroup;
 import com.provemeright.patient_service.service.PatientService;
 import jakarta.validation.Valid;
+import jakarta.validation.groups.Default;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * ============================================================================
@@ -208,11 +212,83 @@ public class PatientController {
      * @return ResponseEntity containing the created patient with generated ID
      */
     @PostMapping
-    public ResponseEntity<PatientResponseDto> createPatient(@Valid @RequestBody PatientRequestDto patientRequestDto){
+    public ResponseEntity<PatientResponseDto> createPatient(
+            @Validated({Default.class, CreatePatientValidationGroup.class})
+            @RequestBody PatientRequestDto patientRequestDto){
         // Delegate to service — the service handles business logic (email uniqueness check)
         PatientResponseDto patientResponseDto = patientService.createPatient(patientRequestDto);
         // Return the created patient (includes the auto-generated UUID)
         return ResponseEntity.ok().body(patientResponseDto);
     }
+
+    /**
+     * UPDATE AN EXISTING PATIENT
+     * --------------------------
+     * HTTP Method: PUT
+     * URL: /patients/{id}
+     * Request Body: JSON matching PatientRequestDto
+     * Response: 200 OK with the updated patient DTO
+     *
+     * @PutMapping("/{id}"):
+     * Maps HTTP PUT requests to this method. The "{id}" part is a URI TEMPLATE
+     * VARIABLE. It tells Spring to capture whatever value is in that part of the
+     * URL (e.g., /patients/123e4567...) and pass it to the method.
+     *
+     * @PathVariable:
+     * Binds the "{id}" from the URL strictly to the UUID id parameter here.
+     * Spring automatically attempts to convert the string in the URL to a Java UUID.
+     * If the string isn't a valid UUID format, Spring throws a TypeMismatchException.
+     *
+     * WHY PUT AND NOT PATCH?
+     * - PUT: Replaces the ENTIRE resource. The client must send the complete representation.
+     * - PATCH: Partially updates the resource. The client sends only the fields to change.
+     * Here, our DTO enforces @NotBlank on all fields, so we expect a full representation,
+     * making PUT the correct semantic choice.
+     *
+     * @param id The UUID of the patient to update, extracted from the URL
+     * @param patientRequestDto The validated JSON request body containing the new data
+     * @return ResponseEntity with 200 OK and the updated patient data
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<PatientResponseDto> updatePatient(
+            @PathVariable UUID id,
+            @Validated({Default.class}) @RequestBody PatientRequestDto patientRequestDto){
+        
+        // Delegate all update logic (fetching, validation, saving) to the service
+        PatientResponseDto patientResponseDto = patientService.updatePatient(id, patientRequestDto);
+        return ResponseEntity.ok().body(patientResponseDto);
+    }
+
+    /**
+     * DELETE A PATIENT
+     * ----------------
+     * HTTP Method: DELETE
+     * URL: /patients/{id}
+     * Response: 204 No Content
+     *
+     * @DeleteMapping("/{id}"):
+     * Maps HTTP DELETE requests for a specific patient ID to this method.
+     *
+     * WHY RETURN 204 NO CONTENT?
+     * When a deletion is successful, we don't have a resource to return to the
+     * client anymore (because it was just deleted!). 
+     * 204 No Content is the standard REST convention for a successful operation 
+     * that intentionally returns nothing in the response body.
+     * 
+     * .build() creates a ResponseEntity with no body and the specified status.
+     *
+     * @param id The UUID of the patient to delete
+     * @return ResponseEntity with 204 No Content status
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePatient(@PathVariable UUID id) {
+        // Delegate deletion logic to the service
+        patientService.deletePatient(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
+
+
 
 }

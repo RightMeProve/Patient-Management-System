@@ -203,4 +203,35 @@ public class GlobalExceptionHandler {
         // Return HTTP 400 Bad Request with the error message
         return ResponseEntity.badRequest().body(errors);
     }
+
+    /**
+     * HANDLER FOR RESOURCE NOT FOUND (PatientNotFoundException)
+     * ---------------------------------------------------------
+     * This method intercepts `PatientNotFoundException` when a requested patient
+     * cannot be found in the database (e.g., during GET by ID, UPDATE, or DELETE).
+     *
+     * HTTP STATUS 404 vs 400:
+     * - We return 404 Not Found (HttpStatus.NOT_FOUND) because the URL itself 
+     *   identifies a resource (/patients/{id}) that does not exist. This is the 
+     *   correct RESTful semantic for "I understand your request, but the thing 
+     *   you want isn't here."
+     * - Returning 400 Bad Request would imply the client formed the request
+     *   incorrectly, which isn't the case here.
+     *
+     * @param ex The exception thrown when the patient is not found
+     * @return 404 Not Found response containing the error message
+     */
+    @ExceptionHandler(PatientNotFoundException.class)
+    public ResponseEntity<Map<String,String>> handlePatientNotFoundException(PatientNotFoundException ex){
+        // Log the event. Still a WARN because it's a client issue (requesting bad ID)
+        log.warn("Patient not found: {}", ex.getMessage());
+        
+        // Build the JSON error response
+        Map<String,String> errors = new HashMap<>();
+        // Use the exception's message to provide specific feedback
+        errors.put("message", ex.getMessage() != null ? ex.getMessage() : "Patient not found");
+        
+        // Return HTTP 404 Not Found
+        return ResponseEntity.status(404).body(errors);
+    }
 }

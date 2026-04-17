@@ -153,11 +153,10 @@ This project is being built incrementally. I'm adding features and services as I
 - [x] Mapper utility for Entity ↔ DTO conversion
 - [x] Global exception handler (`@ControllerAdvice`) for validation & business errors
 - [x] Custom exception — `EmailAlreadyExistsException`
+- [x] `PUT /patients/{id}` — Update patient with field-level validation and unique email check (excluding self)
+- [x] `DELETE /patients/{id}` — Delete patient by ID
 
 ### 🚧 In Progress
-- [ ] `PUT /patients/{id}` — Update patient with field-level validation
-- [ ] `DELETE /patients/{id}` — Soft/hard delete
-- [ ] Email uniqueness validation on update
 - [ ] OpenAPI / Swagger documentation
 
 ### 📋 Planned
@@ -291,8 +290,8 @@ Access the in-memory database UI at: **http://localhost:4000/h2-console**
 |--------|----------|-------------|--------|
 | `GET` | `/patients` | List all patients | ✅ Live |
 | `POST` | `/patients` | Create a new patient | ✅ Live |
-| `PUT` | `/patients/{id}` | Update a patient | 🚧 Coming |
-| `DELETE` | `/patients/{id}` | Delete a patient | 🚧 Coming |
+| `PUT` | `/patients/{id}` | Update a patient | ✅ Live |
+| `DELETE` | `/patients/{id}` | Delete a patient | ✅ Live |
 
 ### Request Body Example (POST `/patients`)
 

@@ -121,4 +121,37 @@ public interface PatientRepository extends JpaRepository<Patient, UUID> {
      * @return true if a patient with this email exists, false otherwise
      */
     boolean existsByEmail(String email);
+
+    /**
+     * DERIVED QUERY METHOD - MULTIPLE CONDITIONS (AND + Not)
+     * ------------------------------------------------------
+     * This method checks if an email exists but EXCLUDING a specific patient ID.
+     * 
+     * WHY DO WE NEED THIS FOR 'UPDATE'?
+     * When updating a patient (e.g., ID 123), we must check if their new email
+     * is already taken. BUT if they keep their existing email, the simple
+     * `existsByEmail("john@example.com")` would return true (because ID 123
+     * currently has it!). This would falsely trigger our duplicate email error.
+     * 
+     * To safely check for duplicates during an update, we must ask the database:
+     * "Does this email exist AND does it belong to someone OTHER THAN me?"
+     * 
+     * METHOD NAME PARSING:
+     *   existsByEmailAndIdNot(String email, UUID id)
+     *   ├── "existsBy" → SELECT COUNT(*) > 0 WHERE...
+     *   ├── "Email"    → email = ?1
+     *   ├── "And"      → AND
+     *   ├── "Id"       → id
+     *   └── "Not"      → != ?2
+     * 
+     * GENERATED SQL (approximately):
+     *   SELECT CASE WHEN COUNT(*) > 0 THEN true ELSE false END
+     *   FROM patient
+     *   WHERE email = ? AND id != ?
+     *
+     * @param email The email address to check
+     * @param id The ID to exclude from the check
+     * @return true if the email is used by another patient, false otherwise
+     */
+    boolean existsByEmailAndIdNot(String email, UUID id);
 }

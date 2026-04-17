@@ -3,6 +3,7 @@ package com.provemeright.patient_service.service;
 import com.provemeright.patient_service.dto.PatientRequestDto;
 import com.provemeright.patient_service.dto.PatientResponseDto;
 import com.provemeright.patient_service.exception.EmailAlreadyExistsException;
+import com.provemeright.patient_service.exception.PatientNotFoundException;
 import com.provemeright.patient_service.mapper.PatientMapper;
 import com.provemeright.patient_service.model.Patient;
 import com.provemeright.patient_service.repository.PatientRepository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * ============================================================================
@@ -224,4 +226,94 @@ public class PatientService {
         return PatientMapper.toDto(newPatient);
 
     }
+
+
+    /**
+     * UPDATE AN EXISTING PATIENT
+     * --------------------------
+     * Updates an existing patient's details. Enforces business rules like
+     * ensuring the new email address isn't already taken by ANOTHER patient.
+     *
+     * BUSINESS LOGIC FLOW:
+     * 1. FIND EXISTING: Try to fetch the patient from the DB by ID.
+     *    - If not found, throw our custom PatientNotFoundException.
+     *    - `findById` returns an Optional<Patient>. We use `.orElseThrow()` to
+     *      elegantly unwrap the Optional or throw an exception in one line.
+     *
+     * 2. CHECK EMAIL UNIQUENESS (Excluding Self):
+     *    - When updating, a patient might keep their existing email, or change
+     *      it to a new one. 
+     *    - If they keep it, `existsByEmail(email)` would return true (because
+     *      they own it!), which is wrong! 
+     *    - We MUST check if the email exists AND belongs to a DIFFERENT patient ID.
+     *      Hence, we use the derived query: `existsByEmailAndIdNot(email, id)`.
+     *
+     * 3. UPDATE ENTITY FIELDS:
+     *    - We update the persistent entity object fetched in step 1.
+     *    - Note: Because this entity is "managed" by Hibernate (it's attached 
+     *      to the current persistence context), any changes to its setters will
+     *      technically be flushed to the database automatically at the end of
+     *      the transaction (called "Dirty Checking").
+     *
+     * 4. EXPLICIT SAVE (Optional but good practice):
+     *    - Even with Dirty Checking, calling `save()` makes the code's intent
+     *      explicit and returns the updated entity reference.
+     *
+     * @param id The ID of the patient to update
+     * @param patientRequestDto The new data for the patient
+     * @return The updated patient mapped as a Response DTO
+     * @throws PatientNotFoundException if the ID doesn't exist in the database
+     * @throws EmailAlreadyExistsException if the new email belongs to another patient
+     */
+    public PatientResponseDto updatePatient(UUID id, PatientRequestDto patientRequestDto) {
+        
+        // Step 1: Find the patient
+        Patient patient = patientRepository.findById(id).orElseThrow(
+                () -> new PatientNotFoundException("Patient not found with id: " + id)
+        );
+
+        // Step 2: Ensure email is unique across OTHER patients
+        if(patientRepository.existsByEmailAndIdNot(patientRequestDto.getEmail(), id)) {
+            throw new EmailAlreadyExistsException(
+                    "A patient with this email " + patientRequestDto.getEmail() + " already exists!"
+            );
+        }
+
+        // Step 3: Update fields
+        patient.setName(patientRequestDto.getName());
+        patient.setEmail(patientRequestDto.getEmail());
+        patient.setAddress(patientRequestDto.getAddress());
+        patient.setDateOfBirth(LocalDate.parse(patientRequestDto.getDateOfBirth()));
+
+        // Step 4: Persist and map
+        Patient updatedPatient = patientRepository.save(patient);
+        return PatientMapper.toDto(updatedPatient);
+    }
+
+    /**
+     * DELETE A PATIENT
+     * ----------------
+     * Deletes a patient from the database by their unique ID.
+     *
+     * HOW `deleteById` WORKS:
+     * 1. Spring Data JPA typically performs a SELECT query first to ensure the
+     *    entity exists.
+     * 2. If it exists, it performs the DELETE query.
+     * 3. If it does not exist, it historically threw an EmptyResultDataAccessException
+     *    (though in newer Spring Boot 3 / Hibernate 6, it may just silently do nothing).
+     *
+     * FOR PRODUCTION CONSIDERATIONS (Soft Delete):
+     * In real healthcare systems, you rarely actually DELETE records from a
+     * database (Hard Delete) due to audit and compliance reasons (like HIPAA). 
+     * Instead, you would use a "Soft Delete":
+     *   - Add a `boolean deleted = false` flag to the entity.
+     *   - Set it to true instead of calling `deleteById`.
+     *   - Filter out `deleted = true` in all your `SELECT` queries.
+     *
+     * @param id The UUID of the patient to delete
+     */
+    public void deletePatient(UUID id) {
+        patientRepository.deleteById(id);
+    }
+
 }

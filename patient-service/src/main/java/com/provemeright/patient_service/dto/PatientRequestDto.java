@@ -1,5 +1,6 @@
 package com.provemeright.patient_service.dto;
 
+import com.provemeright.patient_service.dto.validators.CreatePatientValidationGroup;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -150,7 +151,7 @@ public class PatientRequestDto {
      *
      * EXPECTED FORMAT: ISO 8601 date string, e.g., "2024-11-28"
      */
-    @NotNull(message = "Registered date is required")
+    @NotBlank(groups = CreatePatientValidationGroup.class, message = "Registered date is required")
     private String registeredDate;
 
     // ========================================================================
