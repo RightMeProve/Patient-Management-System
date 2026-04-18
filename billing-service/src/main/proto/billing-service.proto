@@ -1,19 +1,59 @@
+// ============================================================================
+// gRPC PROTOCOL BUFFERS (.proto) FILE
+// ============================================================================
+//
+// WHAT IS gRPC and PROTOBUF?
+// --------------------------
+// gRPC is a high-performance, open-source Remote Procedure Call (RPC) framework.
+// Instead of using JSON over HTTP (like REST), gRPC uses Protocol Buffers
+// (Protobuf) over HTTP/2.
+//
+// Protobuf is a method of serializing structured data. It's smaller, faster,
+// and simpler than XML or JSON. This file acts as the STRICT CONTRACT between
+// the client (patient-service) and the server (billing-service).
+// Both services compile this exact same file to generate native Java code.
+
+// Defines the version of the Protocol Buffers language being used.
 syntax = "proto3";
 
+// java_multiple_files = true tells the compiler to generate separate Java classes
+// for each message type (BillingRequest, BillingResponse) rather than nesting
+// them inside one massive outer class.
 option java_multiple_files = true;
+
+// Defines the Java package where the generated code will reside.
 option java_package = "billing";
 
+// ============================================================================
+// SERVICE DEFINITION
+// ============================================================================
+// A service defines the RPC methods that can be called remotely.
+// This is exactly like defining an Interface in Java.
 service BillingService {
+  // rpc: Declares a method.
+  // CreateBillingAccount: The method name.
+  // (BillingRequest): The input parameter (must be a defined message).
+  // returns (BillingResponse): The output (must be a defined message).
   rpc CreateBillingAccount (BillingRequest) returns (BillingResponse);
 }
 
-message BillingRequest{
+// ============================================================================
+// MESSAGE DEFINITIONS
+// ============================================================================
+// Messages are the data structures passed between client and server.
+// They are equivalent to DTOs (Data Transfer Objects) in REST APIs.
+
+message BillingRequest {
+  // Fields are defined as: type name = tag_number;
+  // The tag numbers (1, 2, 3) are CRITICAL. They are used to identify fields
+  // in the binary encoded data instead of using field names (which makes the
+  // payload incredibly small). Once a tag is assigned, it should NEVER be changed.
   string patientId = 1;
   string name = 2;
   string email = 3;
 }
 
-message BillingResponse{
+message BillingResponse {
   string accountId = 1;
   string status = 2;
 }

@@ -164,19 +164,19 @@ This project is being built incrementally. I'm adding features and services as I
 <details>
 <summary><b>🐳 Docker & Database Migration</b></summary>
 
-- [ ] Containerize patient-service with Docker
+- [x] Containerize patient-service with Docker
 - [ ] Migrate from H2 to PostgreSQL
 - [ ] Docker Compose for multi-service local dev
 </details>
 
-<details>
+<details open>
 <summary><b>💰 Billing Service (gRPC)</b></summary>
 
-- [ ] Create billing-service with gRPC server
-- [ ] Define `.proto` files for billing operations
-- [ ] Implement gRPC client in patient-service
-- [ ] Auto-create billing account on patient creation
-- [ ] Dockerize billing-service
+- [x] Create billing-service with gRPC server
+- [x] Define `.proto` files for billing operations
+- [x] Implement gRPC client in patient-service
+- [x] Auto-create billing account on patient creation
+- [x] Dockerize billing-service
 </details>
 
 <details>
