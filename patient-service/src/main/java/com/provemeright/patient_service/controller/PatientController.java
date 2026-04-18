@@ -4,6 +4,8 @@ import com.provemeright.patient_service.dto.PatientRequestDto;
 import com.provemeright.patient_service.dto.PatientResponseDto;
 import com.provemeright.patient_service.dto.validators.CreatePatientValidationGroup;
 import com.provemeright.patient_service.service.PatientService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.groups.Default;
 import org.springframework.http.ResponseEntity;
@@ -74,6 +76,7 @@ import java.util.UUID;
  */
 @RestController
 @RequestMapping("/patients")
+@Tag(name = "Patient",description = "API for managing patients")
 public class PatientController {
 
     /**
@@ -143,6 +146,7 @@ public class PatientController {
      * @return ResponseEntity containing a list of all patients as DTOs
      */
     @GetMapping
+    @Operation(summary = "Get Patients")
     public ResponseEntity<List<PatientResponseDto>> getPatients(){
         // Delegate to service layer — controller stays thin
         List<PatientResponseDto> patients = patientService.getPatients();
@@ -212,6 +216,7 @@ public class PatientController {
      * @return ResponseEntity containing the created patient with generated ID
      */
     @PostMapping
+    @Operation(summary = "Create Patient")
     public ResponseEntity<PatientResponseDto> createPatient(
             @Validated({Default.class, CreatePatientValidationGroup.class})
             @RequestBody PatientRequestDto patientRequestDto){
@@ -250,6 +255,7 @@ public class PatientController {
      * @return ResponseEntity with 200 OK and the updated patient data
      */
     @PutMapping("/{id}")
+    @Operation(summary = "Update a Patient")
     public ResponseEntity<PatientResponseDto> updatePatient(
             @PathVariable UUID id,
             @Validated({Default.class}) @RequestBody PatientRequestDto patientRequestDto){
@@ -281,6 +287,7 @@ public class PatientController {
      * @return ResponseEntity with 204 No Content status
      */
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete the patient")
     public ResponseEntity<Void> deletePatient(@PathVariable UUID id) {
         // Delegate deletion logic to the service
         patientService.deletePatient(id);
