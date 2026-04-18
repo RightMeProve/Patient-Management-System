@@ -4,9 +4,12 @@ import com.provemeright.patient_service.dto.PatientRequestDto;
 import com.provemeright.patient_service.dto.PatientResponseDto;
 import com.provemeright.patient_service.exception.EmailAlreadyExistsException;
 import com.provemeright.patient_service.exception.PatientNotFoundException;
+import com.provemeright.patient_service.grpc.BillingServiceGrpcClient;
 import com.provemeright.patient_service.mapper.PatientMapper;
 import com.provemeright.patient_service.model.Patient;
 import com.provemeright.patient_service.repository.PatientRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -76,6 +79,7 @@ import java.util.UUID;
 @Service
 public class PatientService {
 
+    private static final Logger log = LoggerFactory.getLogger(PatientService.class);
     /**
      * DEPENDENCY INJECTION - THE CORE OF SPRING
      * ------------------------------------------
@@ -89,7 +93,8 @@ public class PatientService {
      * In tests, we can inject a MOCK repository instead of a real one,
      * so our tests don't need a real database.
      */
-    private PatientRepository patientRepository;
+    private final PatientRepository patientRepository;
+    private final BillingServiceGrpcClient billingServiceGrpcClient;
 
     /**
      * CONSTRUCTOR INJECTION (PREFERRED OVER FIELD INJECTION)
@@ -124,8 +129,9 @@ public class PatientService {
      *
      * @param patientRepository The JPA repository bean, auto-created by Spring Data
      */
-    public PatientService(PatientRepository patientRepository){
+    public PatientService(PatientRepository patientRepository,BillingServiceGrpcClient billingServiceGrpcClient){
         this.patientRepository = patientRepository;
+        this.billingServiceGrpcClient =billingServiceGrpcClient;
     }
 
     /**
@@ -221,6 +227,8 @@ public class PatientService {
                 PatientMapper.toModel(patientRequestDto)
         );
 
+        billingServiceGrpcClient.createBillingAccount(newPatient.getId().toString(), newPatient.getName(), newPatient.getEmail());
+        log.info(newPatient.getName(),newPatient.getEmail());
         // Step 4: Convert the persisted entity back to a response DTO
         // This includes the auto-generated UUID that the client needs
         return PatientMapper.toDto(newPatient);
