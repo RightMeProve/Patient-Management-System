@@ -5,6 +5,7 @@ import com.provemeright.patient_service.dto.PatientResponseDto;
 import com.provemeright.patient_service.exception.EmailAlreadyExistsException;
 import com.provemeright.patient_service.exception.PatientNotFoundException;
 import com.provemeright.patient_service.grpc.BillingServiceGrpcClient;
+import com.provemeright.patient_service.kafka.KafkaProducer;
 import com.provemeright.patient_service.mapper.PatientMapper;
 import com.provemeright.patient_service.model.Patient;
 import com.provemeright.patient_service.repository.PatientRepository;
@@ -95,6 +96,7 @@ public class PatientService {
      */
     private final PatientRepository patientRepository;
     private final BillingServiceGrpcClient billingServiceGrpcClient;
+    private final KafkaProducer kafkaProducer;
 
     /**
      * CONSTRUCTOR INJECTION (PREFERRED OVER FIELD INJECTION)
@@ -129,9 +131,11 @@ public class PatientService {
      *
      * @param patientRepository The JPA repository bean, auto-created by Spring Data
      */
-    public PatientService(PatientRepository patientRepository,BillingServiceGrpcClient billingServiceGrpcClient){
+    public PatientService(PatientRepository patientRepository,BillingServiceGrpcClient billingServiceGrpcClient,
+                          KafkaProducer kafkaProducer){
         this.patientRepository = patientRepository;
         this.billingServiceGrpcClient =billingServiceGrpcClient;
+        this.kafkaProducer = kafkaProducer;
     }
 
     /**
@@ -228,9 +232,10 @@ public class PatientService {
         );
 
         billingServiceGrpcClient.createBillingAccount(newPatient.getId().toString(), newPatient.getName(), newPatient.getEmail());
-        log.info(newPatient.getName(),newPatient.getEmail());
         // Step 4: Convert the persisted entity back to a response DTO
         // This includes the auto-generated UUID that the client needs
+
+        kafkaProducer.sendEvent(newPatient);
         return PatientMapper.toDto(newPatient);
 
     }
