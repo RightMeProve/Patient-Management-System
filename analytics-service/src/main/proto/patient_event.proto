@@ -1,12 +1,23 @@
+// We are using proto3 syntax which is the latest version of Protocol Buffers.
 syntax = "proto3";
 
+// The package name helps prevent name clashes between different projects.
 package patient.events;
 
+// This option tells the compiler to generate separate Java files for each top-level message, 
+// enum, and service defined in the .proto file, rather than a single outer class.
 option java_multiple_files = true;
 
+// A message is the core data structure in Protobuf. It's essentially a strongly-typed schema.
+// This defines the structure of the event that will be published to the Kafka topic.
 message PatientEvent{
+  // Each field in the message has a unique numbered tag (e.g., = 1).
+  // These tags are used to identify fields in the binary encoding, 
+  // and they must not be changed once the message type is in use.
   string patientId = 1;
   string name = 2;
   string email = 3;
+  
+  // Describes what happened to the patient (e.g., "CREATED", "UPDATED", "DELETED")
   string event_type = 4;
 }

@@ -179,22 +179,22 @@ This project is being built incrementally. I'm adding features and services as I
 - [x] Dockerize billing-service
 </details>
 
-<details>
+<details open>
 <summary><b>📊 Analytics Service (Kafka)</b></summary>
 
 - [ ] Set up Kafka broker
 - [ ] Implement Kafka producer in patient-service (publish patient events)
-- [ ] Define Kafka event schema using Protobuf
-- [ ] Create analytics-service as a Kafka consumer
-- [ ] Dockerize analytics-service
+- [x] Define Kafka event schema using Protobuf
+- [x] Create analytics-service as a Kafka consumer
+- [x] Dockerize analytics-service
 </details>
 
-<details>
+<details open>
 <summary><b>🌐 API Gateway</b></summary>
 
-- [ ] Set up Spring Cloud Gateway
-- [ ] Configure route rules for all services
-- [ ] Dockerize and integrate with service network
+- [x] Set up Spring Cloud Gateway
+- [x] Configure route rules for all services
+- [x] Dockerize and integrate with service network
 </details>
 
 <details>
