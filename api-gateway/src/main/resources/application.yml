@@ -1,33 +1,40 @@
 server:
-  port: 4004 # The central port exposed to external clients
+  port: 4004
 
 spring:
   cloud:
     gateway:
-      server:
-        # We are using Spring Cloud Gateway which is built on Spring WebFlux (reactive).
-        # This allows it to handle a massive number of concurrent connections efficiently using non-blocking I/O.
-        webflux: 
-          routes:
-            # 1. API Documentation Route
-            # Routes Swagger/OpenAPI doc requests to the patient service.
-            - id: api-docs-patient-route
-              uri: http://patient-service:4000
-              predicates:
-                # When a request hits /api-docs/patients
-                - Path=/api-docs/patients
-              filters:
-                # Rewrite the path so the downstream service sees /v3/api-docs instead
-                - RewritePath=/api-docs/patients, /v3/api-docs
+      routes:
 
-            # 2. Patient Service Route
-            # Routes all patient-related API requests to the patient service.
-            - id: patient-service-route
-              uri: http://patient-service:4000
-              predicates:
-                # Matches any path starting with /api/patients/
-                - Path=/api/patients/**
-              filters:
-                # Removes the first path segment (e.g., /api) before forwarding.
-                # So a request to /api/patients/1 becomes /patients/1 when it reaches patient-service.
-                - StripPrefix=1
+        # 🔐 Auth Service Route (no JWT required)
+        - id: auth-service-route
+          uri: http://auth-service:4005
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=1
+
+        # 📄 Swagger Docs - Patient Service
+        - id: api-docs-patient-route
+          uri: http://patient-service:4000
+          predicates:
+            - Path=/api-docs/patients
+          filters:
+            - RewritePath=/api-docs/patients, /v3/api-docs
+
+        # 🏥 Patient Service Route (JWT protected)
+        - id: patient-service-route
+          uri: http://patient-service:4000
+          predicates:
+            - Path=/api/patients/**
+          filters:
+            - StripPrefix=1
+            - JwtValidation
+
+        # 📄 Swagger Docs - Auth Service
+        - id: api-docs-auth-route
+          uri: http://auth-service:4005
+          predicates:
+            - Path=/api-docs/auth
+          filters:
+            - RewritePath=/api-docs/auth, /v3/api-docs
