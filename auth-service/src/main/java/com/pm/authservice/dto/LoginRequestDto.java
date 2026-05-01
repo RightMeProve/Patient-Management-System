@@ -5,6 +5,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+/**
+ * Data Transfer Object for login credentials.
+ * 
+ * Decouples the API contract from the internal User domain model. Utilizes Jakarta
+ * Bean Validation to ensure incoming requests meet minimum format requirements before
+ * hitting the service layer.
+ */
 @Data
 public class LoginRequestDto {
     @NotBlank(message = "Email is required")

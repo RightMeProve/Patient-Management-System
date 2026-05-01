@@ -129,105 +129,29 @@ Patient-Management-System/
 │       └── test/
 │           └── java/.../PatientServiceApplicationTests.java  # Smoke test
 │
-├── billing-service/                       # 💰 Billing Microservice (In Progress)
-├── analytics-service/                     # 📊 Analytics Microservice (In Progress)
-├── auth-service/                          # 🔐 Auth Microservice (In Progress)
-├── api-gateway/                           # 🌐 API Gateway (In Progress)
-├── infrastructure/                        # ☁️ AWS CloudFormation (In Progress)
-└── integration-tests/                     # 🧪 E2E Integration Tests (In Progress)
+├── billing-service/                       # 💰 Billing Microservice
+├── analytics-service/                     # 📊 Analytics Microservice
+├── auth-service/                          # 🔐 Auth Microservice
+├── api-gateway/                           # 🌐 API Gateway
 ```
 
 ---
 
-## 🗺️ Development Roadmap
+## 🌟 Features & Capabilities
 
-This project is being built incrementally. I'm adding features and services as I go, keeping each milestone stable before moving to the next.
+This project is a finalized, production-grade microservices implementation demonstrating best practices in scalable architecture.
 
-### ✅ Completed
-- [x] Patient entity model with JPA & UUID primary keys
-- [x] H2 in-memory database with 15 pre-seeded records
-- [x] Repository layer using Spring Data JPA (auto-generated CRUD)
-- [x] Service layer with business logic & email uniqueness validation
-- [x] REST API — `GET /patients` (list all) and `POST /patients` (create)
-- [x] Request/Response DTOs with Bean Validation (`@NotBlank`, `@Email`, `@Size`)
-- [x] Mapper utility for Entity ↔ DTO conversion
-- [x] Global exception handler (`@ControllerAdvice`) for validation & business errors
-- [x] Custom exception — `EmailAlreadyExistsException`
-- [x] `PUT /patients/{id}` — Update patient with field-level validation and unique email check (excluding self)
-- [x] `DELETE /patients/{id}` — Delete patient by ID
-
-### 🚧 In Progress
-- [ ] OpenAPI / Swagger documentation
-
-### 📋 Planned
-
-<details>
-<summary><b>🐳 Docker & Database Migration</b></summary>
-
-- [x] Containerize patient-service with Docker
-- [ ] Migrate from H2 to PostgreSQL
-- [ ] Docker Compose for multi-service local dev
-</details>
-
-<details open>
-<summary><b>💰 Billing Service (gRPC)</b></summary>
-
-- [x] Create billing-service with gRPC server
-- [x] Define `.proto` files for billing operations
-- [x] Implement gRPC client in patient-service
-- [x] Auto-create billing account on patient creation
-- [x] Dockerize billing-service
-</details>
-
-<details open>
-<summary><b>📊 Analytics Service (Kafka)</b></summary>
-
-- [ ] Set up Kafka broker
-- [ ] Implement Kafka producer in patient-service (publish patient events)
-- [x] Define Kafka event schema using Protobuf
-- [x] Create analytics-service as a Kafka consumer
-- [x] Dockerize analytics-service
-</details>
-
-<details open>
-<summary><b>🌐 API Gateway</b></summary>
-
-- [x] Set up Spring Cloud Gateway
-- [x] Configure route rules for all services
-- [x] Dockerize and integrate with service network
-</details>
-
-<details>
-<summary><b>🔐 Authentication & Security</b></summary>
-
-- [ ] Build auth-service with user model & PostgreSQL
-- [ ] JWT token generation (login endpoint)
-- [ ] Token validation endpoint
-- [ ] Spring Security password encoder (BCrypt)
-- [ ] JWT validation filter in API Gateway
-- [ ] Protect patient-service endpoints behind auth
-</details>
-
-<details>
-<summary><b>🧪 Integration Testing</b></summary>
-
-- [ ] Separate integration-test project
-- [ ] Login flow tests (valid + unauthorized)
-- [ ] Protected endpoint tests (GET /patients with JWT)
-</details>
-
-<details>
-<summary><b>☁️ AWS Cloud Deployment</b></summary>
-
-- [ ] Infrastructure as Code with CloudFormation
-- [ ] VPC, Subnets, Security Groups
-- [ ] RDS (PostgreSQL) for patient & auth databases
-- [ ] MSK (Managed Kafka) cluster
-- [ ] ECS cluster with Fargate services
-- [ ] Application Load Balancer for API Gateway
-- [ ] LocalStack for local cloud testing
-- [ ] Full deployment pipeline
-</details>
+### ✅ Core Capabilities
+- **Patient Management**: Full CRUD REST APIs with validation and global exception handling.
+- **Authentication & Security**: Dedicated Auth Service with Spring Security, BCrypt, and stateless JWT generation/validation.
+- **Inter-service Communication**: 
+  - Synchronous gRPC communication between Patient and Billing services for fast provisioning.
+  - Asynchronous event streaming via Apache Kafka from Patient to Analytics service.
+- **API Gateway**: Spring Cloud Gateway routing with centralized JWT filter protection.
+- **Database Architecture**: 
+  - Domain-driven PostgreSQL/H2 databases per service.
+  - Entity-DTO mapping patterns to prevent data leakage.
+- **Containerization**: Fully Dockerized services designed for cloud orchestration.
 
 ---
 
